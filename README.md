@@ -1,44 +1,54 @@
-# TML 扩展模板 · Java
+<p align="right">
+  <b>English</b> · <a href="README-CN.md">简体中文</a>
+</p>
 
-TYW Launcher（TML）扩展模板，演示如何用 **Java** 编写一个扩展（打包为 `.jar`）。
-扩展运行在启动器进程之外，通过 stdin/stdout 的 NDJSON（每行一个 JSON）交换白名单方法。
+# TML Extension Template · Java
 
-> 本仓库为 GitHub **模板仓库（template repository）**，点击 “Use this template” 即可派生出你自己的扩展工程。
+A **Java** extension template for the **TYW Launcher (TML)** extension API v1. It shows how to
+write an extension packaged as a `.jar`. Extensions run outside the launcher process and talk to
+it over **NDJSON on stdin/stdout** (one JSON object per line), calling only allow-listed methods.
 
-## 目录结构
+> This repository is a GitHub **template repository** — click "Use this template" to
+> scaffold your own extension project.
+>
+> Part of the **TML** ecosystem · launcher repository: <https://github.com/TYWStudio/TML>
+
+## Layout
 
 ```
-META-INF/tml-extension.json   扩展清单（id / 名称 / 入口 / 权限 / 订阅事件 …）
+META-INF/tml-extension.json   Extension manifest (id / name / entry / permissions / subscribed events …)
 src/com/tywstudio/example/
-    Main.java                 扩展入口（entry 指向这里）
-    Json.java                 极简 JSON 解析/序列化（零依赖）
-build.sh / build.bat          编译并打包成 .jar
+    Main.java                 Extension entry point (target of `entry`)
+    Json.java                 Minimal JSON parser/serializer (zero dependencies)
+build.sh / build.bat          Compile and package into a .jar
 LICENSE                       CC BY-NC 4.0
 ```
 
-## 协议要点
+## Protocol essentials
 
-- 宿主启动扩展时执行 `java -cp "<jar>" com.tywstudio.example.Main`，
-  先发 `initialize` 请求；扩展须回 `{"ready": true}` 完成握手。
-- 扩展调用宿主能力（如 `log`、`host.info`）即向 stdout 写一行 JSON-RPC 请求，宿主回结果。
-- 宿主通过 `event` 行向扩展广播事件（如 `launcher.started`、`game.launched`）。
-- 宿主发送 `shutdown` 时扩展应干净退出。
+- The host starts the extension with `java -cp "<jar>" com.tywstudio.example.Main` and sends an
+  `initialize` request first; the extension must reply `{"ready": true}` to complete the handshake.
+- To call a host capability (e.g. `log`, `host.info`) the extension writes one line of JSON-RPC
+  request to stdout, and the host replies with the result.
+- The host broadcasts events (e.g. `launcher.started`, `game.launched`) to the extension as
+  `event` lines.
+- When the host sends `shutdown` the extension should exit cleanly.
 
-可用能力（需写在 manifest 的 `permissions` 里）：
+Available capabilities (must be declared in the manifest's `permissions`):
 
-| 方法 | 权限 | 说明 |
+| Method | Permission | Description |
 | --- | --- | --- |
-| `log` | `log` | 写启动器日志 |
-| `toast` | `toast` | 弹左下角提示 |
-| `host.info` | `host.info` | 取宿主平台/版本/语言等 |
-| `instances.list` | `instances.list` | 取的实例列表（脱敏） |
-| `event.subscribe` | `events` | 订阅事件（还须在 `subscribe` 声明） |
-| `storage.get/set` | `storage` | 扩展私有键值存储 |
-| `settings.get/set` | `settings` | 读写启动器设置（命名空间 `ext.<id>.*`） |
+| `log` | `log` | Write to the launcher log |
+| `toast` | `toast` | Show a toast in the bottom-left corner |
+| `host.info` | `host.info` | Get host platform / version / language |
+| `instances.list` | `instances.list` | List game instances (redacted) |
+| `event.subscribe` | `events` | Subscribe to events (also declare them in `subscribe`) |
+| `storage.get/set` | `storage` | Extension-private key-value storage |
+| `settings.get/set` | `settings` | Read/write launcher settings (namespace `ext.<id>.*`) |
 
-## 编译与打包
+## Compile & package
 
-需要 JDK（含 `javac` 与 `jar`）：
+Requires a JDK (with `javac` and `jar`):
 
 ```bash
 # Linux / macOS
@@ -47,19 +57,19 @@ bash build.sh
 build.bat
 ```
 
-产物：`com.tywstudio.example.java.jar`。
+Output: `com.tywstudio.example.java.jar`.
 
-## 导入与启用
+## Import & enable
 
-把生成的 `.jar` 在启动器「设置 → 其他 → 拓展 → 导入」里导入，
-确认权限后启用即可。首次启用会要求确认申请的权限。
+Import the generated `.jar` via **Settings → Other → Extensions → Import** in the launcher,
+review the requested permissions and enable it. The first enable asks you to confirm the permissions.
 
-## 注意事项
+## Notes
 
-- `META-INF/tml-extension.json` 的 `platforms` 当前须包含 `windows`（Windows 宿主已实现，其余平台后续补充）。
-- 扩展默认全部禁用，且只能访问白名单能力；任何文件/网络/凭据相关的能力都不存在。
-- 不要硬编码敏感信息；持久化数据请走 `storage` / `settings`。
+- `platforms` in `META-INF/tml-extension.json` must currently include `windows` (the Windows host is implemented; other platforms will follow).
+- Extensions are disabled by default and can only access allow-listed capabilities; no capability for arbitrary file / network / credential access exists.
+- Do not hard-code secrets; persist data via `storage` / `settings`.
 
-## 许可证
+## License
 
-[CC BY-NC 4.0](./LICENSE) —— 署名-非商业性使用。可自由学习、修改、二次分发，但不得用于商业目的。
+[CC BY-NC 4.0](./LICENSE) — Attribution-NonCommercial. You may study, modify and redistribute freely, but not for commercial use.
