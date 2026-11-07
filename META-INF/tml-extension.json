@@ -1,0 +1,14 @@
+{
+  "apiVersion": 1,
+  "id": "com.tywstudio.example.java",
+  "name": "TML 拓展示例 (Java)",
+  "version": "1.0.0",
+  "author": "TYWStudio",
+  "description": "TYW Launcher 扩展模板（Java）示例。",
+  "runtime": "java",
+  "format": "jar",
+  "entry": "com.tywstudio.example.Main",
+  "platforms": ["windows"],
+  "permissions": ["log", "toast", "host.info", "instances.list", "events", "storage", "settings"],
+  "subscribe": ["launcher.started", "game.launched", "settings.changed"]
+}
